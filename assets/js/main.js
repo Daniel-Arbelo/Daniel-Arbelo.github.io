@@ -281,7 +281,7 @@
     };
 
     const getGeminiResponse = async (userMessage) => {
-      // WARNING: Exposing the API key in client-side code is a security risk.
+      // WARNING:Por favor no me robes jajajajajaj da igual es el plan gratuito.
       const API_KEY = 'AIzaSyDWwQaBMrbbK5vnO6sI7rjnS-QpJvDjK8A';
       const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
 
