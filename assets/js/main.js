@@ -1,10 +1,10 @@
 /**
-* Template Name: Personal
-* Template URL: https://bootstrapmade.com/personal-free-resume-bootstrap-template/
-* Updated: Nov 04 2024 with Bootstrap v5.3.3
-* Author: BootstrapMade.com
-* License: https://bootstrapmade.com/license/
-*/
+ * Template Name: Personal
+ * Template URL: https://bootstrapmade.com/personal-free-resume-bootstrap-template/
+ * Updated: Nov 04 2024 with Bootstrap v5.3.3
+ * Author: BootstrapMade.com
+ * License: https://bootstrapmade.com/license/
+ */
 
 (function() {
   "use strict";
@@ -15,7 +15,10 @@
   function toggleScrolled() {
     const selectBody = document.querySelector('body');
     const selectHeader = document.querySelector('#header');
-    if (!selectHeader.classList.contains('scroll-up-sticky') && !selectHeader.classList.contains('sticky-top') && !selectHeader.classList.contains('fixed-top')) return;
+    if (!selectHeader.classList.contains('scroll-up-sticky') &&
+        !selectHeader.classList.contains('sticky-top') &&
+        !selectHeader.classList.contains('fixed-top')) return;
+
     window.scrollY > 100 ? selectBody.classList.add('scrolled') : selectBody.classList.remove('scrolled');
   }
 
@@ -45,7 +48,6 @@
         mobileNavToogle();
       }
     });
-
   });
 
   /**
@@ -198,11 +200,10 @@
         }
       }, false);
     });
-
   });
 
   /**
-   * Gemini Chat Widget
+   * Gemini Chat Widget (via Cloudflare Worker proxy)
    */
   const chatButton = document.getElementById('gemini-chat-button');
   const chatPopup = document.getElementById('gemini-chat-popup');
@@ -260,7 +261,7 @@
       const messageElement = document.createElement('div');
       messageElement.classList.add('chat-message', sender);
       // Use innerHTML to properly render line breaks from the model
-      messageElement.innerHTML = message.replace(/\n/g, '<br>');
+      messageElement.innerHTML = String(message).replace(/\n/g, '<br>');
       chatBody.appendChild(messageElement);
       chatBody.scrollTop = chatBody.scrollHeight;
     };
@@ -281,29 +282,61 @@
     };
 
     const getGeminiResponse = async (userMessage) => {
-      // WARNING:Por favor no me robes jajajajajaj da igual es el plan gratuito.
-      const API_KEY = 'AIzaSyDWwQaBMrbbK5vnO6sI7rjnS-QpJvDjK8A';
-      const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+      // ✅ Cloudflare Worker (proxy). If your Worker is mounted under a route like /api,
+      // change this to "...workers.dev/api"
+      const WORKER_URL = 'https://daniel-cv-gemini.arbelohernandezdaniel.workers.dev';
+
+      // Basic client-side guard
+      const safeUserMessage = String(userMessage || '').trim();
+      if (!safeUserMessage) return '';
+      if (safeUserMessage.length > 1000) {
+        return 'Tu mensaje es demasiado largo. Por favor, resume un poco la pregunta.';
+      }
 
       const systemPrompt = {
         role: "system",
         parts: [{
-          text: `Eres Daniel Arbelo Hernández, un Ingeniero Informático de 26 años. Responde a las preguntas de los visitantes en primera persona, como si fueras tú mismo. Sé amable, profesional y servicial.\n\n          Aquí está tu información:\n\n          - **Quién eres:** Soy Daniel Arbelo Hernández, un Ingeniero Informático de 26 años residente en La Orotava, Santa Cruz de Tenerife.\n          - **Contacto:** Mi email es arbelohernandezdaniel@gmail.com y mi teléfono es 677740949.\n          - **Formación:** Me gradué en Ingeniería Informática por la Universidad de La Laguna en 2023, con mención en Tecnologías de la Información.\n          - **Idiomas:** Hablo Español (Nativo) e Inglés (nivel B2 certificado por Cambridge).\n          - **Disponibilidad:** Tengo disponibilidad total, carné de conducir y vehículo propio. También poseo licencias de drones A1 y A3.\n\n          **Mi Experiencia Profesional:**\n          1. **Técnico Superior Ingeniero Informático en el Cabildo Insular de Tenerife (Feb 2024 - Ene 2025):**\n              - Desarrollé aplicaciones multiplataforma con Flutter.\n              - Creé y mantuve sitios web optimizados.\n          2. **Desarrollador en Ordenatech (Mar 2023 - May 2023):**\n              - Desarrollé y mantuve sitios web responsivos.\n              - Optimicé bases de datos y administré Windows Server.\n              - Supervisé sistemas de backup.\n\n          **Mis Habilidades Técnicas:**\n          - **Lenguajes de Programación:** C, C++, JavaScript, TypeScript, Python, Ruby, Dart.\n          - **Tecnologías y Frameworks:** React.js, Vue.js, Flutter, Bootstrap, Firebase, MongoDB.\n          - **Infraestructura y Redes:** Google Cloud, Active Directory, PowerShell, Bash, redes LAN/WIFI, IPv4/IPv6, Firewalls.\n          - **Herramientas:** Visual Studio Code, GitHub, SSH, Android Studio.\n          - **Metodologías:** Scrum, Agile, Git.\n          - **Competencias Adicionales:** Desarrollo Full Stack, pruebas unitarias, aprendo rápido nuevas tecnologías, y tengo conocimientos en drones autónomos (Mission Planner, QGroundControl, MAVLink) y electrónica.\n\n          Cuando un visitante te pregunte, utiliza esta información para formular tus respuestas en primera persona. Si te preguntan algo que no está en tu currículum, puedes decir amablemente que no tienes esa información pero que pueden contactarme directamente.`
+          text:
+`Eres Daniel Arbelo Hernández, un Ingeniero Informático de 26 años. Responde a las preguntas de los visitantes en primera persona, como si fueras tú mismo. Sé amable, profesional y servicial.
+
+Aquí está tu información:
+
+- **Quién eres:** Soy Daniel Arbelo Hernández, un Ingeniero Informático de 26 años residente en La Orotava, Santa Cruz de Tenerife.
+- **Contacto:** Mi email es arbelohernandezdaniel@gmail.com y mi teléfono es 677740949.
+- **Formación:** Me gradué en Ingeniería Informática por la Universidad de La Laguna en 2023, con mención en Tecnologías de la Información.
+- **Idiomas:** Hablo Español (Nativo) e Inglés (nivel B2 certificado por Cambridge).
+- **Disponibilidad:** Tengo disponibilidad total, carné de conducir y vehículo propio. También poseo licencias de drones A1 y A3.
+
+**Mi Experiencia Profesional:**
+1. **Técnico Superior Ingeniero Informático en el Cabildo Insular de Tenerife (Feb 2024 - Ene 2025):**
+   - Desarrollé aplicaciones multiplataforma con Flutter.
+   - Creé y mantuve sitios web optimizados.
+2. **Desarrollador en Ordenatech (Mar 2023 - May 2023):**
+   - Desarrollé y mantuve sitios web responsivos.
+   - Optimicé bases de datos y administré Windows Server.
+   - Supervisé sistemas de backup.
+
+**Mis Habilidades Técnicas:**
+- **Lenguajes de Programación:** C, C++, JavaScript, TypeScript, Python, Ruby, Dart.
+- **Tecnologías y Frameworks:** React.js, Vue.js, Flutter, Bootstrap, Firebase, MongoDB.
+- **Infraestructura y Redes:** Google Cloud, Active Directory, PowerShell, Bash, redes LAN/WIFI, IPv4/IPv6, Firewalls.
+- **Herramientas:** Visual Studio Code, GitHub, SSH, Android Studio.
+- **Metodologías:** Scrum, Agile, Git.
+- **Competencias Adicionales:** Desarrollo Full Stack, pruebas unitarias, aprendo rápido nuevas tecnologías, y tengo conocimientos en drones autónomos (Mission Planner, QGroundControl, MAVLink) y electrónica.
+
+Cuando un visitante te pregunte, utiliza esta información para formular tus respuestas en primera persona. Si te preguntan algo que no está en tu currículum, puedes decir amablemente que no tienes esa información pero que pueden contactarme directamente.`
         }]
       };
 
       const userMessageContent = {
         role: "user",
-        parts: [{
-          text: userMessage
-        }]
+        parts: [{ text: safeUserMessage }]
       };
 
-      const response = await fetch(API_URL, {
+      const response = await fetch(WORKER_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Goog-Api-Key': API_KEY,
         },
         body: JSON.stringify({
           contents: [userMessageContent],
@@ -313,13 +346,19 @@
 
       if (!response.ok) {
         const errorBody = await response.text();
-        console.error('API Error Response:', errorBody);
-        throw new Error(`API request failed with status ${response.status}`);
+        console.error('Proxy Error Response:', errorBody);
+        throw new Error(`Proxy request failed with status ${response.status}`);
       }
 
       const data = await response.json();
-      
-      if (data.candidates && data.candidates.length > 0 && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts.length > 0) {
+
+      if (
+        data.candidates &&
+        data.candidates.length > 0 &&
+        data.candidates[0].content &&
+        data.candidates[0].content.parts &&
+        data.candidates[0].content.parts.length > 0
+      ) {
         return data.candidates[0].content.parts[0].text;
       } else {
         if (data.promptFeedback && data.promptFeedback.blockReason) {
