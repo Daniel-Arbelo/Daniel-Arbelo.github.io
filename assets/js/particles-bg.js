@@ -32,8 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     class Particle {
         constructor() {
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height;
+            this.x = Math.random() * window.innerWidth;
+            this.y = Math.random() * window.innerHeight;
             this.vx = (Math.random() - 0.5) * config.baseSpeed;
             this.vy = (Math.random() - 0.5) * config.baseSpeed;
             this.size = Math.random() * 2 + 1;
@@ -44,8 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
             this.y += this.vy;
 
             // Bounce off edges
-            if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
-            if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            if (this.x < 0 || this.x > window.innerWidth) this.vx *= -1;
+            if (this.y < 0 || this.y > window.innerHeight) this.vy *= -1;
 
             // Mouse interaction
             if (mouse.x != null) {
@@ -75,8 +75,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function init() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        // High DPI support
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = window.innerWidth * dpr;
+        canvas.height = window.innerHeight * dpr;
+        ctx.scale(dpr, dpr);
+
+        // CSS size (needed for proper scaling)
+        canvas.style.width = `${window.innerWidth}px`;
+        canvas.style.height = `${window.innerHeight}px`;
+
         particles = [];
 
         // Adjust particle count based on screen size
@@ -114,8 +122,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Event Listeners
+    let lastWidth = window.innerWidth;
     window.addEventListener('resize', () => {
-        init();
+        // Only re-init if width changes (prevents reset on mobile scroll/address bar toggle)
+        if (window.innerWidth !== lastWidth) {
+            lastWidth = window.innerWidth;
+            init();
+        }
     });
 
     window.addEventListener('mousemove', (e) => {
